@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<style>
+#chat {
+  height: 500px;
+  overflow: auto;
+  font-size: 16px;
+}
+
+.container > .jumbotron {
+  height: 120px;
+  padding: 1.5% 1% 5% 1%;
+}
+
+.content {
+  box-sizing: border-box;
+  overflow: auto;
+  height: 85%;
+  margin: 1% 0;
+}
+
+/* msg */
+
+.msg {
+  padding: 1%;
+  margin: 1%;
+  border: 1px solid var(--blue);
+  border-radius: 3px;
+  color: var(--dark);
+  width: fit-content;
+  max-width: 80%;
+}
+
+.msg .head {
+  width: 100%;
+  color: var(--indigo);
+  font-weight: 350;
+  font-style: italic;
+  font-size: 12px;
+}
+
+.msg .body {
+  margin: 1% 0;
+  font-size: 16px;
+}
+
+.msg .footer {
+  color: gray;
+  font-size: 12px;
+}
+
+/* tools */
+
+.tools {
+  position: relative;
+}
+
+.tools .emoji-list {
+  display: none;
+  flex-wrap: wrap;
+  position: absolute;
+  right: 2%;
+  bottom: 110%;
+  border-radius: 5px;
+  border: 1px solid gray;
+  width: 270px;
+  height: 150px;
+  overflow: auto;
+}
+
+.tools .emoji-list .emoji {
+  margin: 1%;
+}
+</style>
+
+<script>
+class App {
+  static messages = [];
+
+  static sendMessage() {
+    let message = document.getElementById("newMessage").value;
+    let from = document.getElementById("from").value;
+    localStorage.setItem("from", from);
+
+    App.messages.push(new Message(message, from));
+    document.getElementById("newMessage").value = "";
+
+    localStorage.setItem("messages", JSON.stringify(App.messages));
+    App.refreshChat();
+  }
+
+  static refreshChat() {
+    let div = document.getElementById("chat-content");
+
+    for (
+      let index = div.childNodes.length - 1;
+      index < App.messages.length;
+      index++
+    ) {
+      const element = App.messages[index];
+      let msg = document.createElement("span");
+
+      msg.id = "msg-" + index;
+      msg.classList.add("msg");
+      msg.innerHTML = "<div class='head'> " + element.from + " </div>";
+      msg.innerHTML += "<p class='body'> " + element.message + " </p>";
+      msg.innerHTML += "<div class='footer'> " + element.timeStr + " </div>";
+      div.appendChild(msg);
+    }
+  }
+}
+
+class Message {
+  constructor(msg, from) {
+    this.message = msg;
+    this.time = new Date(Date.now());
+    this.timeStr = this.time.toLocaleTimeString();
+    this.from = from;
+  }
+}
+
+let activated = false;
+let emojiBtn = document.getElementById("emoji");
+
+let emojiList = [
+  "👍",
+  "👌",
+  "👏",
+  "🙏",
+  "🆗",
+  "🙂",
+  "😀",
+  "😃",
+  "😉",
+  "😊",
+  "😋",
+  "😌",
+  "😏",
+  "😐",
+  "😑",
+  "😒",
+  "😓",
+  "😂",
+  "🤣",
+  "😅",
+  "😆",
+  "😜",
+  "😹",
+  "🚶",
+  "👫",
+  "👬",
+  "👭",
+  "😙",
+  "😘",
+  "🏠",
+  "👆",
+  "🖕",
+  "👋",
+  "👎",
+  "👈",
+  "👉"
+];
+emojiList.forEach(element => {
+  let list = document.getElementById("emoji-list");
+  let node = document.createElement("span");
+  node.classList.add("emoji");
+  node.textContent = element;
+  node.onclick = ev => {
+    document.getElementById("newMessage").value += node.textContent;
+  };
+  list.appendChild(node);
+});
+
+emojiBtn.onclick = function(evt) {
+  activated = !activated;
+
+  let list = document.getElementById("emoji-list");
+  if (activated) {
+    list.style.display = "flex";
+  } else {
+    list.style.display = "none";
+  }
+};
+
+document.getElementById("from").value =
+  localStorage.getItem("from") !== undefined
+    ? localStorage.getItem("from")
+    : "";
+App.messages =
+  JSON.parse(localStorage.getItem("messages")) !== null
+    ? JSON.parse(localStorage.getItem("messages"))
+    : new Array();
+
+let div = document.getElementById("chat-content");
+for (let index = 0; index < App.messages.length; index++) {
+  const element = App.messages[index];
+  let msg = document.createElement("span");
+
+  msg.id = "msg-" + index;
+  msg.classList.add("msg");
+  msg.innerHTML = "<div class='head'> " + element.from + " </div>";
+  msg.innerHTML += "<p class='body'> " + element.message + " </p>";
+  msg.innerHTML += "<div class='footer'> " + element.timeStr + " </div>";
+  div.appendChild(msg);
+}
+
+</script>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+  <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+  <title>Chat App</title>
+</head>
+
+<body>
+  <div class="container">
+    <div class="jumbotron">
+      <h1 class="display-4">Chat App</h1>
+      <p class="lead">By SmfCoder</p>
+    </div>
+
+    <div class="container-fluid bg-light" id="chat">
+      <div class="content d-flex flex-column" id="chat-content">
+
+      </div>
+      <form class="tools form-row">
+        <input id="newMessage" class="form-control col mr-2" type="text" name="" placeholder="Message">
+        <input id="from" class="form-control col-2 mr-2" type="text" name="" placeholder="From">
+        <div class="emoji-list" id="emoji-list">
+
+        </div>
+        <button id="emoji" class="form-control col-1 mr-2" type="button" name="" placeholder="From">
+          <i class="far fa-grin-alt"></i>
+        </button>
+        <button onclick="App.sendMessage()" class="btn btn-primary " type="button">
+          <i class="far fa-paper-plane"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+</body>
+
+</html>
